@@ -1,0 +1,12 @@
+<resources>
+    <!-- warna bawaan boleh biarin -->
+    <color name="purple_200">#BB86FC</color>
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
+    <color name="teal_200">#03DAC5</color>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+
+    <!-- TAMBAH INI: warna biru buat navbar -->
+    <color name="blue_navbar">#0D47A1</color>  <!-- biru tua -->
+</resources>
