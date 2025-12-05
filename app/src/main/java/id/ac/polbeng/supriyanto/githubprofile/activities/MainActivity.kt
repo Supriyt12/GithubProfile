@@ -2,23 +2,19 @@ package id.ac.polbeng.supriyanto.githubprofile.activities
 
 import android.os.Bundle
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import id.ac.polbeng.supriyanto.githubprofile.R
 import id.ac.polbeng.supriyanto.githubprofile.databinding.ActivityMainBinding
-import id.ac.polbeng.supriyanto.githubprofile.helpers.Config
 import id.ac.polbeng.supriyanto.githubprofile.models.GithubUser
-import id.ac.polbeng.supriyanto.githubprofile.viewmodels.MainViewModel   // perhatiin import ini
+import id.ac.polbeng.supriyanto.githubprofile.viewmodels.MainViewModel
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-
-    companion object {
-        val TAG: String = MainActivity::class.java.simpleName
-    }
+    private val mainViewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,41 +23,32 @@ class MainActivity : AppCompatActivity() {
 
         supportActionBar?.hide()
 
-        // --- ambil ViewModel ---
-        val mainViewModel = ViewModelProvider(
-            this,
-            ViewModelProvider.NewInstanceFactory()
-        ).get(MainViewModel::class.java)
-
         // observe data user
         mainViewModel.githubUser.observe(this) { user ->
-            if (user != null) {
-                setUserData(user)
-            }
+            if (user != null) setUserData(user)
         }
 
-        // observe loading state
+        // observe loading
         mainViewModel.isLoading.observe(this) { isLoading ->
             showLoading(isLoading)
         }
 
-        // load user default pertama kali
-        mainViewModel.searchUser(Config.DEFAULT_USER_LOGIN)
-
         // tombol search
         binding.btnSearchUserLogin.setOnClickListener {
-            val userLogin = binding.etSearchUserLogin.text.toString().trim()
-            if (userLogin.isNotEmpty()) {
-                mainViewModel.searchUser(userLogin)
+            val username = binding.etSearchUserLogin.text.toString().trim()
+            if (username.isNotEmpty()) {
+                mainViewModel.searchUser(username)
+            } else {
+                binding.etSearchUserLogin.error = "Username tidak boleh kosong"
             }
         }
     }
 
     private fun setUserData(githubUser: GithubUser) {
-        // sementara tampilkan toString dulu
+        // Sementara tampilkan semua data jadi String
         binding.tvUser.text = githubUser.toString()
 
-        Glide.with(this@MainActivity)
+        Glide.with(this)
             .load(githubUser.avatarUrl)
             .apply(
                 RequestOptions()
@@ -72,7 +59,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showLoading(isLoading: Boolean) {
-        binding.progressBar.visibility =
-            if (isLoading) View.VISIBLE else View.GONE
+        binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
     }
 }

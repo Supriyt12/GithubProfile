@@ -1,15 +1,7 @@
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    kotlin("kapt")
-}
-
-// baca apikey.properties di root project
-val apikeyPropertiesFile = rootProject.file("apikey.properties")
-val apikeyProperties = Properties().apply {
-    load(apikeyPropertiesFile.inputStream())
+    kotlin("kapt")          // untuk compiler Glide
 }
 
 android {
@@ -23,14 +15,34 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // ini yang buat field ACCESS_TOKEN di BuildConfig
+        // Token Github – ganti dengan token punyamu sendiri
         buildConfigField(
             "String",
             "ACCESS_TOKEN",
-            "\"${apikeyProperties["ACCESS_TOKEN"]}\""
+            "\"ghp_UDLi62PZ6tpkBTIHQnAtHRlBt7M4uN3nvPPT\""
         )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+
+    // ==== PERBAIKAN JVM-TARGET (BIAR GAK BENTROK) ====
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 
     buildFeatures {
@@ -38,7 +50,6 @@ android {
         buildConfig = true
     }
 }
-
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -51,20 +62,20 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    // library untuk menampilkan gambar bergerak splashscreen
+    // Lottie (animasi splashscreen)
     implementation("com.airbnb.android:lottie:5.2.0")
 
-    // library untuk menampilkan gambar bulat (circle)
+    // CircleImageView (foto bulat)
     implementation("de.hdodenhof:circleimageview:3.1.0")
 
-    // library untuk menampilkan gambar melalui url (Glide)
+    // Glide (load gambar dari URL)
     implementation("com.github.bumptech.glide:glide:4.13.2")
     kapt("com.github.bumptech.glide:compiler:4.13.2")
 
-    // library untuk request API
+    // Retrofit (HTTP client)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    // library untuk logging hasil request API
+    // OkHttp logging interceptor
     implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.9")
 }

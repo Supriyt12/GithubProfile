@@ -25,22 +25,22 @@ class MainViewModel : ViewModel() {
     val isLoading: LiveData<Boolean> = _isLoading
 
     init {
-        // pas app pertama dibuka, langsung cari user default
+        // pertama kali app dibuka, langsung cari user default
         searchUser(Config.DEFAULT_USER_LOGIN)
     }
 
     fun searchUser(query: String) {
         _isLoading.value = true
-        Log.d(TAG, "getDataUserProfileFromAPI: start...")
+        Log.d(TAG, "getDataUserProfileFromAPI: start, query=$query")
 
         val githubUserService: GithubUserService =
             ServiceBuilder.buildService(GithubUserService::class.java)
 
-        // PAKAI TOKEN + USERNAME (sesuai modul)
+        // PENTING: HANYA SATU baris ini, pakai token + username
         val requestCall: Call<GithubUser> =
             githubUserService.loginUser(Config.PERSONAL_ACCESS_TOKEN, query)
 
-        Log.d(TAG, "getDataUserFromAPI: ${requestCall.request().url}")
+        Log.d(TAG, "request url = ${requestCall.request().url}")
 
         requestCall.enqueue(object : Callback<GithubUser> {
             override fun onResponse(
@@ -48,19 +48,23 @@ class MainViewModel : ViewModel() {
                 response: Response<GithubUser>
             ) {
                 _isLoading.value = false
-                if (response.isSuccessful) {
-                    val result = response.body()
-                    Log.d(TAG, result.toString())
+                Log.d(TAG, "onResponse: code=${response.code()}")
+
+                if (response.isSuccessful && response.body() != null) {
+                    val result = response.body()!!
+                    Log.d(TAG, "result = $result")
                     _githubUser.postValue(result)
-                    Log.d(TAG, "getDataUserFromAPI: onResponse finish...")
                 } else {
-                    Log.d(TAG, "getDataUserFromAPI: onResponse failed... code=${response.code()}")
+                    Log.e(
+                        TAG,
+                        "Response gagal, code=${response.code()}, message=${response.errorBody()?.string()}"
+                    )
                 }
             }
 
             override fun onFailure(call: Call<GithubUser>, t: Throwable) {
                 _isLoading.value = false
-                Log.d(TAG, "getDataUserFromAPI: onFailure ${t.message}...")
+                Log.e(TAG, "onFailure: ${t.message}", t)
             }
         })
     }
